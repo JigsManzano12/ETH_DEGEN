@@ -10,11 +10,11 @@ The DegenToken smart contract is built on the Ethereum blockchain and utilizes t
 
 1. **ERC-20 Token**: DegenToken is a standard ERC-20 token, supporting typical token operations such as transfer, minting, and burning.
 
-2. **Item Rewards**: Users can participate in a roulette-style game to win items such as gift cards, headsets, watches, VR headsets, and iPhones.
+2. **Item Rewards**: Users can participate in a roulette-style game to win items such as Toy Cars, Board Games, Laptops, Tablets, and Cameras.
 
-3. **Item Quantities**: The contract tracks the quantities of each item won by a user.
+3. **Item Quantities**: The contract tracks the quantities of each item won by a user, allowing users to view their winnings.
 
-4. **Owner Minting**: The contract owner can mint new tokens.
+4. **Owner Minting**: The contract owner has the exclusive ability to mint new tokens, ensuring controlled issuance.
 
 ## Getting Started
 
@@ -22,37 +22,81 @@ The DegenToken smart contract is built on the Ethereum blockchain and utilizes t
 
 To use the DegenToken smart contract, you need:
 
-- An Ethereum development environment or a testnet for deploying the contract.
+- An Ethereum development environment such as Truffle or Hardhat, or a testnet like Ropsten or Rinkeby.
+- A web3-compatible browser or wallet (e.g., MetaMask) to interact with the deployed contract.
 
 ### Installation
 
-1. Clone the repository.
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/your-repo/degen-token.git
+    cd degen-token
+    ```
 
-2. Compile and deploy the contract using a Solidity development environment or a tool like Remix.
+2. Compile and deploy the contract using a Solidity development environment or a tool like Remix:
+    - **Using Remix**:
+        1. Open [Remix](https://remix.ethereum.org/).
+        2. Load the `DegenToken.sol` contract file.
+        3. Compile the contract.
+        4. Deploy the contract on an Ethereum testnet or the mainnet.
 
 ## Usage
 
 The contract provides the following key functions:
 
-- `mint(uint256 amount)`: Allows the contract owner to mint new tokens.
+- `mint(uint256 amount)`: Allows the contract owner to mint new tokens. This function can only be called by the owner.
+    ```solidity
+    function mint(uint256 amount) public onlyOwner {
+        _mint(msg.sender, amount);
+    }
+    ```
 
-- `burn(uint256 amount)`: Allows users to burn their own tokens.
+- `burn(uint256 amount)`: Allows users to burn their own tokens, reducing the total supply.
+    ```solidity
+    function burn(uint256 amount) public {
+        _burn(msg.sender, amount);
+    }
+    ```
 
-- `transfer(address to, uint256 amount)`: Overrides the ERC-20 `transfer` function to enable transfers.
+- `transfer(address to, uint256 amount)`: Overrides the ERC-20 `transfer` function to enable token transfers between users.
+    ```solidity
+    function transfer(address to, uint256 amount) public override returns (bool) {
+        return super.transfer(to, amount);
+    }
+    ```
 
-- `spinRoulette()`: Allows users to participate in the roulette game, spending 500 tokens to potentially win items.
+- `spinRoulette()`: Allows users to participate in the roulette game by spending 500 tokens to potentially win items.
+    ```solidity
+    function spinRoulette() public {
+        require(balanceOf(msg.sender) >= 500, "Not enough tokens to spin the roulette");
+        _burn(msg.sender, 500);
+        uint256 reward = _randomReward();
+        _addItemToInventory(msg.sender, reward);
+    }
+    ```
 
 - `getInventory(address user)`: Retrieves the items and their quantities owned by a user.
+    ```solidity
+    function getInventory(address user) public view returns (Item[] memory) {
+        return userInventories[user];
+    }
+    ```
 
 ## Contributing
 
-Contributions to this project are welcome. If you'd like to contribute, please follow the standard GitHub pull request process.
+Contributions to this project are welcome. If you'd like to contribute, please follow the standard GitHub pull request process:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes.
+4. Commit your changes (`git commit -m 'Add new feature'`).
+5. Push to the branch (`git push origin feature-branch`).
+6. Open a pull request.
 
 ## Authors
 
-Gerard Manzano
+Gerard Manzano  
 [@Chill Code](https://www.youtube.com/channel/UCqnpVDK-Ym41W1WDvBMmN6w)
-
 
 ## License
 
