@@ -1,10 +1,10 @@
 # DegenToken Smart Contract
 
-The DegenToken is a Solidity smart contract that represents a simple ERC-20 token with additional functionality for a roulette-style item rewards system. This README provides an overview of the contract and instructions on how to use it.
+The DegenToken is a Solidity smart contract that represents a simple ERC-20 token
 
 ## Introduction
 
-The DegenToken smart contract is built on the Ethereum blockchain and utilizes the OpenZeppelin ERC-20 and Ownable libraries. It introduces an item-based rewards system where users can "spin" a roulette to win various swords based on their token balance.
+The DegenToken smart contract is built on the Ethereum blockchain and utilizes the OpenZeppelin ERC-20 and Ownable libraries. It introduces an item-based rewards system where you can redeem swords from Westeros randomly based on your token balance.
 
 ## Features
 
@@ -22,7 +22,6 @@ The DegenToken smart contract is built on the Ethereum blockchain and utilizes t
 
 To use the DegenToken smart contract, you need:
 
-- An Ethereum development environment such as Truffle or Hardhat, or a testnet like Ropsten or Rinkeby.
 - A web3-compatible browser or wallet (e.g., MetaMask) to interact with the deployed contract.
 
 ### Installation
@@ -36,7 +35,7 @@ To use the DegenToken smart contract, you need:
 2. Compile and deploy the contract using a Solidity development environment or a tool like Remix:
     - **Using Remix**:
         1. Open [Remix](https://remix.ethereum.org/).
-        2. Load the `DegenToken.sol` contract file.
+        2. Load the `Degen.sol` contract file.
         3. Compile the contract.
         4. Deploy the contract on an Ethereum testnet or the mainnet.
 
