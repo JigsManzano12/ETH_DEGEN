@@ -4,15 +4,15 @@ The DegenToken is a Solidity smart contract that represents a simple ERC-20 toke
 
 ## Introduction
 
-The DegenToken smart contract is built on the Ethereum blockchain and utilizes the OpenZeppelin ERC-20 and Ownable libraries. It introduces an item-based rewards system where users can "spin" a roulette to win various items based on their token balance.
+The DegenToken smart contract is built on the Ethereum blockchain and utilizes the OpenZeppelin ERC-20 and Ownable libraries. It introduces an item-based rewards system where users can "spin" a roulette to win various swords based on their token balance.
 
 ## Features
 
 1. **ERC-20 Token**: DegenToken is a standard ERC-20 token, supporting typical token operations such as transfer, minting, and burning.
 
-2. **Item Rewards**: Users can participate in a roulette-style game to win items such as Toy Cars, Board Games, Laptops, Tablets, and Cameras.
+2. **Item Rewards**: Users can participate in a roulette-style game to win swords such as Longclaw, Ice, Oathkeeper, and more.
 
-3. **Item Quantities**: The contract tracks the quantities of each item won by a user, allowing users to view their winnings.
+3. **Item Tracking**: The contract tracks the redeemed sword for each user, allowing users to view their winnings.
 
 4. **Owner Minting**: The contract owner has the exclusive ability to mint new tokens, ensuring controlled issuance.
 
@@ -44,10 +44,10 @@ To use the DegenToken smart contract, you need:
 
 The contract provides the following key functions:
 
-- `mint(uint256 amount)`: Allows the contract owner to mint new tokens. This function can only be called by the owner.
+- `checkBalance(address account)`: Returns the token balance of the specified account.
     ```solidity
-    function mint(uint256 amount) public onlyOwner {
-        _mint(msg.sender, amount);
+    function checkBalance(address account) public view returns (uint256) {
+        return balanceOf(account);
     }
     ```
 
@@ -58,27 +58,42 @@ The contract provides the following key functions:
     }
     ```
 
+- `mint(address to, uint256 amount)`: Allows the contract owner to mint new tokens. This function can only be called by the owner.
+    ```solidity
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+    ```
+
 - `transfer(address to, uint256 amount)`: Overrides the ERC-20 `transfer` function to enable token transfers between users.
     ```solidity
-    function transfer(address to, uint256 amount) public override returns (bool) {
-        return super.transfer(to, amount);
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+        _transfer(_msgSender(), to, amount);
+        return true;
     }
     ```
 
-- `spinRoulette()`: Allows users to participate in the roulette game by spending 500 tokens to potentially win items.
+- `redeem(uint256 amount)`: Allows users to participate in the roulette game by spending tokens to potentially win swords.
     ```solidity
-    function spinRoulette() public {
-        require(balanceOf(msg.sender) >= 500, "Not enough tokens to spin the roulette");
-        _burn(msg.sender, 500);
-        uint256 reward = _randomReward();
-        _addItemToInventory(msg.sender, reward);
+    function redeem(uint256 amount) external {
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
+
+        uint256 randomIndex = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % swords.length;
+        string memory sword = swords[randomIndex];
+
+        uint256 swordPrice = swordPrices[sword];
+        require(amount >= swordPrice, "Insufficient tokens to redeem this sword");
+
+        _burn(msg.sender, swordPrice);
+
+        redeemedItems[msg.sender] = sword;
     }
     ```
 
-- `getInventory(address user)`: Retrieves the items and their quantities owned by a user.
+- `getRedeemedItem(address account)`: Retrieves the sword redeemed by a user.
     ```solidity
-    function getInventory(address user) public view returns (Item[] memory) {
-        return userInventories[user];
+    function getRedeemedItem(address account) external view returns (string memory) {
+        return redeemedItems[account];
     }
     ```
 
