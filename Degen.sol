@@ -1,65 +1,73 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts@4.9.0/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts@4.9.0/access/Ownable.sol";
 
 contract DegenToken is ERC20, Ownable {
+    string[] private swords = [
+        "Longclaw",
+        "Ice",
+        "Oathkeeper",
+        "Widow's Wail",
+        "Heartsbane",
+        "Dawn",
+        "Blackfyre",
+        "Dark Sister",
+        "Needle",
+        "Lightbringer"
+    ];
 
-    enum Item { None, ToyCar, BoardGame, Laptop, Tablet, Camera }
+    mapping(string => uint256) public swordPrices;
+    mapping(address => string) public redeemedItems;
 
-    mapping(address => Item) public inventory;
-    mapping(address => mapping(uint256 => uint256)) public itemQuantities;
+    constructor() ERC20("Degen", "DGN") {
+        _mint(msg.sender, 1000000 * 1 ** uint(decimals()));
 
-    constructor() ERC20("Degen", "DGN") {}
-    //Gerard Jose
-    function mint(uint256 amount) public onlyOwner {
-        _mint(msg.sender, amount);
+        swordPrices["Longclaw"] = 100 * 1 ** uint(decimals());
+        swordPrices["Ice"] = 200 * 1 ** uint(decimals());
+        swordPrices["Oathkeeper"] = 150 * 1 ** uint(decimals());
+        swordPrices["Widow's Wail"] = 180 * 1 ** uint(decimals());
+        swordPrices["Heartsbane"] = 130 * 1 ** uint(decimals());
+        swordPrices["Dawn"] = 210 * 10 ** uint(decimals());
+        swordPrices["Blackfyre"] = 170 * 1 ** uint(decimals());
+        swordPrices["Dark Sister"] = 160 * 1 ** uint(decimals());
+        swordPrices["Needle"] = 90 * 1 ** uint(decimals());
+        swordPrices["Lightbringer"] = 220 * 1 ** uint(decimals());
+    }
+
+    function checkBalance(address account) public view returns (uint256) {
+        return balanceOf(account);
     }
 
     function burn(uint256 amount) public {
-        _burn(msg.sender, amount);
+        _burn(_msgSender(), amount);
     }
 
-    function transfer(address to, uint256 amount) public override returns (bool) {
-        _transfer(msg.sender, to, amount);
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+        _transfer(_msgSender(), to, amount);
         return true;
     }
 
-    function spinRoulette() public {
-        require(balanceOf(msg.sender) >= 500, "Insufficient balance to spin the roulette");
+    function redeem(uint256 amount) external {
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
 
-        uint256 randomNumber = uint256(keccak256(abi.encodePacked(block.prevrandao, block.timestamp, msg.sender))) % 100;
+        uint256 randomIndex = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % swords.length;
+        string memory sword = swords[randomIndex];
 
-        uint256 rewardIndex = randomNumber % 20;
-    //Gerard Jose
-        Item reward = getItemByIndex(rewardIndex);
+        uint256 swordPrice = swordPrices[sword];
+        require(amount >= swordPrice, "Insufficient tokens to redeem this sword");
 
-        if (reward != Item.None) {
-            inventory[msg.sender] = reward;
-            itemQuantities[msg.sender][uint256(reward)]++; // Increment quantity
-        }
+        _burn(msg.sender, swordPrice);
 
-        _burn(msg.sender, 500); // Burn 500 tokens for spinning
+        redeemedItems[msg.sender] = sword;
     }
 
-    function getItemByIndex(uint256 index) internal pure returns (Item) {
-        if (index < 8) {
-            return Item.ToyCar;
-        } else if (index < 10) {
-            return Item.BoardGame;
-        } else if (index < 20) {
-            return Item.Laptop;
-        } else if (index == 30) {
-            return Item.Tablet;
-        } else if (index == 40) {
-            return Item.Camera;
-        } else {
-            return Item.None;
-        }
-    }
-    //Gerard Jose
-    function getInventory(address user) public view returns (Item, uint256) {
-        return (inventory[user], itemQuantities[user][uint256(inventory[user])]);
+    function getRedeemedItem(address account) external view returns (string memory) {
+        return redeemedItems[account];
     }
 }
