@@ -53,18 +53,14 @@ contract DegenToken is ERC20, Ownable {
         return true;
     }
 
-    function redeem(uint256 amount) external {
-        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
-
-        uint256 randomIndex = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % swords.length;
-        string memory sword = swords[randomIndex];
-
-        uint256 swordPrice = swordPrices[sword];
-        require(amount >= swordPrice, "Insufficient tokens to redeem this sword");
+    function redeem(string memory swordName) external {
+        require(swordPrices[swordName] > 0, "Sword does not exist");
+        uint256 swordPrice = swordPrices[swordName];
+        require(balanceOf(msg.sender) >= swordPrice, "Insufficient balance to redeem this sword");
 
         _burn(msg.sender, swordPrice);
 
-        redeemedItems[msg.sender] = sword;
+        redeemedItems[msg.sender] = swordName;
     }
 
     function getRedeemedItem(address account) external view returns (string memory) {
