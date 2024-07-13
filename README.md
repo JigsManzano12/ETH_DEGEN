@@ -53,7 +53,7 @@ The contract provides the following key functions:
 - `burn(uint256 amount)`: Allows users to burn their own tokens, reducing the total supply.
     ```solidity
     function burn(uint256 amount) public {
-        _burn(msg.sender, amount);
+        _burn(_msgSender(), amount);
     }
     ```
 
@@ -72,20 +72,16 @@ The contract provides the following key functions:
     }
     ```
 
-- `redeem(uint256 amount)`: Allows users to participate in the roulette game by spending tokens to potentially win swords.
+- `redeem(string memory swordName)`: Allows users to participate in the roulette game by spending tokens to potentially win swords.
     ```solidity
-    function redeem(uint256 amount) external {
-        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
-
-        uint256 randomIndex = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % swords.length;
-        string memory sword = swords[randomIndex];
-
-        uint256 swordPrice = swordPrices[sword];
-        require(amount >= swordPrice, "Insufficient tokens to redeem this sword");
+    function redeem(string memory swordName) external {
+        require(swordPrices[swordName] > 0, "Sword does not exist");
+        uint256 swordPrice = swordPrices[swordName];
+        require(balanceOf(msg.sender) >= swordPrice, "Insufficient balance to redeem this sword");
 
         _burn(msg.sender, swordPrice);
 
-        redeemedItems[msg.sender] = sword;
+        redeemedItems[msg.sender] = swordName;
     }
     ```
 
